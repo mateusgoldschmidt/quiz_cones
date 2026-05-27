@@ -400,7 +400,10 @@
       q.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
-        btn.onclick = () => checkAnswer(idx);
+        btn.onclick = () => {
+          checkAnswer(idx);
+          btn.blur(); // Remove foco no Safari/iPhone
+        };
         
         if (opt.type === 'image') {
           btn.innerHTML = `<div class="option-image-wrap">${opt.content}</div><span>${opt.label}</span>`;
