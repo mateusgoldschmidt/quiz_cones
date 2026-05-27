@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geometria Analítica: Cones</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- Renderização Matemática de Alta Performance -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  
+  <style>
+    :root {
+      --bg-color: #0a0a0c;
+      --panel-bg: rgba(23, 23, 26, 0.9);
+      --primary: #6366f1; /* Indigo */
+      --secondary: #ec4899; /* Pink */
+      --accent: #06b6d4; /* Cyan */
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-light: rgba(255, 255, 255, 0.08);
+      --glow-shadow: 0 0 25px rgba(99, 102, 241, 0.2);
+    }
+    
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0; min-height: 100vh; padding: 15px; color: var(--text-main); font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.1), transparent 30%),
+        radial-gradient(circle at 90% 90%, rgba(236, 72, 153, 0.1), transparent 30%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+      background-attachment: fixed;
+      display: flex; align-items: center; justify-content: center;
+    }
+    
+    .app {
+      width: 100%; max-width: 950px; background: var(--panel-bg); border: 1px solid var(--border-light); 
+      border-radius: 28px; box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8); 
+      backdrop-filter: blur(20px); overflow: hidden; position: relative;
+    }
+    
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 20px 30px; 
+      border-bottom: 1px solid var(--border-light); background: rgba(0,0,0,0.2);
+    }
+    
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .title { font-family: 'Plus+Jakarta+Sans', sans-serif; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; background: linear-gradient(90deg, #818cf8, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .status-pill { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 12px; background: rgba(255,255,255,0.04); font-weight: 600; color: var(--text-muted); font-size: 0.85rem; border: 1px solid var(--border-light); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #475569; }
+    .dot.live { background: var(--success); box-shadow: 0 0 12px var(--success); }
+    
+    .screen { display: none; padding: 45px 35px; animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    .screen.active { display: block; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    h1 { font-family: 'Plus+Jakarta+Sans', sans-serif; font-size: clamp(2.2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.1; margin: 0 0 15px 0; color: #fff; letter-spacing: -0.03em; }
+    h2 { font-size: 1.15rem; color: var(--text-muted); margin: 0 0 35px 0; font-weight: 400; line-height: 1.6; max-width: 600px; margin-left: auto; margin-right: auto; }
+    h3 { font-family: 'Plus+Jakarta+Sans', sans-serif; font-size: 1.3rem; margin: 0 0 20px 0; color: #fff; font-weight: 700; }
+    
+    .input-name {
+      width: 100%; max-width: 400px; padding: 20px 24px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.08); 
+      background: rgba(255,255,255,0.03); color: #fff; font-size: 1.2rem; font-weight: 600; text-align: center; 
+      transition: all 0.3s ease; font-family: inherit; margin-bottom: 30px;
+    }
+    .input-name:focus { border-color: var(--primary); outline: none; box-shadow: var(--glow-shadow); background: rgba(255,255,255,0.06); }
+    
+    .btn {
+      border: none; padding: 18px 32px; border-radius: 16px; color: white; font-weight: 700; font-size: 1.1rem; 
+      cursor: pointer; background: linear-gradient(135deg, var(--primary), #4f46e5); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+      font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      box-shadow: 0 10px 20px -10px rgba(99, 102, 241, 0.4);
+    }
+    .btn:hover:not(:disabled) { transform: translateY(-4px); box-shadow: 0 20px 30px -10px rgba(99, 102, 241, 0.5); }
+    .btn:active { transform: translateY(-1px); }
+    .btn-secondary { background: linear-gradient(135deg, var(--secondary), #db2777); box-shadow: 0 10px 20px -10px rgba(236, 72, 153, 0.4); }
+    .btn-secondary:hover { box-shadow: 0 20px 30px -10px rgba(236, 72, 153, 0.5); }
+    .btn-success { background: linear-gradient(135deg, var(--success), #059669); box-shadow: 0 10px 20px -10px rgba(16, 185, 129, 0.4); }
+    .btn-danger { background: linear-gradient(135deg, var(--danger), #dc2626); box-shadow: 0 10px 20px -10px rgba(239, 68, 68, 0.4); }
+    .btn-ghost { background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); box-shadow: none; }
+    .btn-ghost:hover { background: rgba(255,255,255,0.05); color: #fff; transform: translateY(-2px); }
+    
+    .progress-container { width: 100%; height: 8px; background: rgba(0,0,0,0.4); border-radius: 10px; margin-bottom: 30px; overflow: hidden; border: 1px solid var(--border-light); }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); width: 0%; transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    .status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .chip { padding: 10px 20px; border-radius: 14px; background: rgba(255,255,255,0.03); font-weight: 700; font-size: 0.95rem; color: #e2e8f0; border: 1px solid var(--border-light); }
+    .timer { color: var(--accent); font-family: 'Plus+Jakarta+Sans', monospace; font-size: 1.1rem; background: rgba(6, 182, 212, 0.08); border-color: rgba(6, 182, 212, 0.2); }
+    
+    .question-box {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; padding: 45px 30px; 
+      font-size: 1.4rem; font-weight: 600; line-height: 1.5; margin-bottom: 30px; text-align: center; color: #fff;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+    }
+    
+    .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    
+    .option-btn {
+      width: 100%; border: 1px solid var(--border-light); border-radius: 20px; padding: 25px; min-height: 130px; 
+      background: rgba(255,255,255,0.03); color: #fff; cursor: pointer; display: flex; flex-direction: column; 
+      align-items: center; justify-content: center; gap: 15px; transition: all 0.25s ease; font-family: inherit; 
+      font-size: 1.15rem; font-weight: 600; position: relative; overflow: hidden;
+    }
+    .option-btn:hover:not(:disabled) { border-color: var(--primary); transform: translateY(-3px); background: rgba(99, 102, 241, 0.08); box-shadow: 0 15px 30px -10px rgba(0,0,0,0.3); }
+    
+    .option-btn.correct { background: rgba(16,185,129,0.15) !important; border-color: var(--success) !important; color: #fff; box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
+    .option-btn.wrong { background: rgba(239,68,68,0.15) !important; border-color: var(--danger) !important; color: #fff; opacity: 0.7; }
+    .option-btn:disabled { cursor: not-allowed; }
+    
+    .option-image-wrap { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 14px; padding: 12px; position: relative; z-index: 1; }
+    .option-image-wrap svg { max-width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(0 0 8px rgba(255,255,255,0.1)); }
+    
+    .overlay { position: absolute; inset: 0; background: rgba(10, 10, 12, 0.98); backdrop-filter: blur(15px); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 100; text-align: center; }
+    .overlay.active { opacity: 1; pointer-events: all; }
+    .overlay h1 { font-size: 3.5rem; color: var(--danger); margin-bottom: 0; letter-spacing: -0.05em; }
+    .overlay p { font-size: 1.4rem; color: var(--text-muted); font-weight: 500; margin-top: 20px; }
+    
+    .teacher-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 25px; }
+    .leaderboard { display: grid; gap: 12px; max-height: 420px; overflow-y: auto; padding-right: 8px; }
+    .leaderboard::-webkit-scrollbar { width: 6px; }
+    .leaderboard::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+    .rank-item { display: flex; flex-direction: column; gap: 10px; padding: 20px; border-radius: 18px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); transition: transform 0.2s; }
+    .rank-item.top-1 { background: rgba(99, 102, 241, 0.05); border-color: rgba(99, 102, 241, 0.3); }
+    .rank-header { display: flex; justify-content: space-between; align-items: center; width: 100%; font-size: 1.1rem; font-weight: 600; }
+    .rank-bar-bg { width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 10px; overflow: hidden; }
+    .rank-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 10px; transition: width 0.8s ease; }
+
+    .katex-display { overflow-x: auto; overflow-y: hidden; padding: 10px 0; }
+
+    @media (max-width: 768px) {
+      .teacher-layout { grid-template-columns: 1fr; }
+      .screen { padding: 30px 20px; }
+      h1 { font-size: 2.4rem; }
+      .options-grid { gap: 15px; }
+    }
+    @media (max-width: 600px) {
+      .options-grid { grid-template-columns: 1fr; }
+      .option-btn { min-height: 100px; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    
+    <!-- Penalização -->
+    <div class="overlay" id="penalty-overlay">
+      <div style="padding: 40px; border-radius: 30px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
+        <h1>ERRO DETECTADO</h1>
+        <p>Ajuste de precisão: <span style="color: #fff; font-weight: 800;">+5 Segundos</span> adicionados ao cronômetro.</p>
+        <p style="font-size: 1.1rem; color: #fff; margin-top: 10px;">Analise a questão novamente e tente outra resposta.</p>
+      </div>
+    </div>
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="brand">
+        <div class="title">Lab Geométrico: Cones</div>
+      </div>
+      <div class="status-pill">
+        <span class="dot" id="server-dot"></span>
+        <span id="server-status">Sincronizando...</span>
+      </div>
+    </div>
+
+    <!-- TELA 1: LOGIN -->
+    <section id="screen-login" class="screen active" style="text-align: center;">
+      <div style="margin: 40px 0;">
+        <div style="display: inline-block; padding: 12px 24px; border-radius: 100px; background: rgba(99, 102, 241, 0.1); color: var(--primary); font-weight: 700; font-size: 0.9rem; margin-bottom: 20px; border: 1px solid rgba(99, 102, 241, 0.2);">ENSINO MÉDIO • MATEMÁTICA</div>
+        <h1>Desafio de Geometria</h1>
+        <h2>Teste seus conhecimentos sobre sólidos de revolução e otimização de volumes em um ambiente dinâmico.</h2>
+        <input type="text" id="player-name" class="input-name" placeholder="Digite seu nome completo" autocomplete="off">
+        <br>
+        <button class="btn" onclick="joinLobby()">Entrar no Laboratório</button>
+      </div>
+      <div style="margin-top: 60px; border-top: 1px solid var(--border-light); padding-top: 30px;">
+        <button class="btn btn-ghost" onclick="enterTeacherMode()">Acesso do Professor</button>
+      </div>
+    </section>
+
+    <!-- TELA 2: LOBBY DE ESPERA -->
+    <section id="screen-lobby" class="screen" style="text-align: center;">
+      <div style="margin: 40px 0;">
+        <h1>Bem-vindo, <span id="display-name" style="color: var(--primary);"></span>!</h1>
+        <h2>Aguardando autorização do professor para iniciar a sessão de testes.</h2>
+        <div style="margin-top:40px; padding:25px 40px; border-radius:20px; background:rgba(255,255,255,0.03); border:1px solid var(--border-light); display: inline-block; font-weight:600; color:var(--accent); font-size: 1.1rem;" id="sync-text">
+          Conectado ao servidor. Aguarde...
+        </div>
+        <div style="margin-top: 30px;">
+          <button class="btn btn-ghost" onclick="location.reload()">Voltar ao Início</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TELA 3: O QUIZ -->
+    <section id="screen-quiz" class="screen">
+      <div class="progress-container"><div class="progress-bar" id="quiz-progress"></div></div>
+      <div class="status-bar">
+        <span class="chip" id="q-counter">Questão 1 de 10</span>
+        <span class="chip timer" id="time-display">0.0s</span>
+      </div>
+      <div class="question-box" id="question-text">
+        <!-- Pergunta -->
+      </div>
+      <div class="options-grid" id="options-container">
+        <!-- Botões -->
+      </div>
+    </section>
+
+    <!-- TELA 4: RESULTADO ALUNO -->
+    <section id="screen-result" class="screen">
+      <div style="text-align: center; margin-bottom: 40px;">
+        <div style="font-size: 4rem; margin-bottom: 10px;">✅</div>
+        <h1>Teste Concluído!</h1>
+        <h2 style="color: var(--text-muted);">Seu tempo final registrado: <span id="final-time" style="color: #fff; font-weight: 800; font-size: 2rem;"></span></h2>
+      </div>
+      <div style="background: rgba(255,255,255,0.02); padding: 35px; border-radius: 24px; border: 1px solid var(--border-light);">
+        <h3 style="text-align: center; margin-bottom: 25px;">Classificação Geral 🏆</h3>
+        <div id="student-leaderboard" class="leaderboard">
+          <!-- Tabela -->
+        </div>
+        <div style="text-align: center; margin-top: 40px; display: flex; gap: 15px; justify-content: center;">
+           <button class="btn" onclick="location.reload()">Refazer Quiz</button>
+           <button class="btn btn-ghost" onclick="location.reload()">Sair do Laboratório</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TELA 5: PAINEL DO PROFESSOR -->
+    <section id="screen-teacher" class="screen">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 35px;">
+        <div>
+          <h1 style="margin-bottom: 5px;">Gestão de Sala</h1>
+          <p style="color: var(--text-muted); margin: 0;">Controle o início e monitore o progresso dos alunos em tempo real.</p>
+        </div>
+        <button class="btn btn-ghost" onclick="location.reload()">Sair do Painel</button>
+      </div>
+      
+      <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 40px; padding: 25px; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid var(--border-light);">
+        <button class="btn btn-success" onclick="triggerStartGame()">Liberar Início (Todos)</button>
+        <button class="btn btn-secondary" onclick="refreshTeacherPanels()">Atualizar Dados</button>
+        <button class="btn btn-danger" onclick="triggerResetGame()">Resetar Sessão</button>
+      </div>
+      
+      <div class="teacher-layout">
+        <div style="background: rgba(255,255,255,0.02); padding: 25px; border-radius: 24px; border: 1px solid var(--border-light);">
+          <h3 style="display: flex; align-items: center; gap: 10px;"><span style="color: var(--accent);">●</span> Progresso ao Vivo</h3>
+          <div id="teacher-live-status" class="leaderboard">
+            <!-- Status -->
+          </div>
+        </div>
+        <div style="background: rgba(255,255,255,0.02); padding: 25px; border-radius: 24px; border: 1px solid var(--border-light);">
+          <h3 style="display: flex; align-items: center; gap: 10px;"><span style="color: var(--warning);">★</span> Ranking de Velocidade</h3>
+          <div id="teacher-leaderboard" class="leaderboard">
+            <!-- Ranking -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    const GASURL = 'https://script.google.com/macros/s/AKfycbwX6GBBjMh6UCgCyp2P4SdmOXfvou0gCEQ9Zpe4L9qj5huPzpVMBjhmq1YUhqrnIjBB/exec';
+
+    let playerName = '';
+    let currentQ = 0;
+    let startTime = 0;
+    let timePenalty = 0;
+    
+    let timerInterval = null;
+    let lobbyInterval = null;
+    let statusInterval = null;
+    let leaderboardInterval = null;
+    let teacherStatusInterval = null;
+    
+    let gameStartedLocal = false;
+    let isTeacherMode = false;
+    let quizData = [];
+
+    function renderMathSafe(elementId) {
+      setTimeout(() => {
+        const el = document.getElementById(elementId);
+        if (el && window.renderMathInElement) {
+          window.renderMathInElement(el, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '\\(', right: '\\)', display: false },
+              { left: '\\[', right: '\\]', display: true }
+            ],
+            throwOnError: false
+          });
+        }
+      }, 50);
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      window.scrollTo(0,0);
+    }
+
+    function setServerStatus(status, isLive = false) {
+      const dot = document.getElementById('server-dot');
+      const text = document.getElementById('server-status');
+      if (text) text.innerText = status;
+      if (dot) dot.className = isLive ? 'dot live' : 'dot';
+    }
+
+    // ALUNO
+    async function joinLobby() {
+      const input = document.getElementById('player-name');
+      if (!input.value.trim()) return alert("Por favor, digite seu nome.");
+      
+      playerName = input.value.trim();
+      document.getElementById('display-name').innerText = playerName;
+      showScreen('screen-lobby');
+      
+      setServerStatus("Conectando...");
+      
+      lobbyInterval = setInterval(async () => {
+        try {
+          const res = await fetch(GASURL, { method: 'POST', body: JSON.stringify({ action: 'check_status' }) });
+          const data = await res.json();
+          
+          if (data.started && !gameStartedLocal) {
+            clearInterval(lobbyInterval);
+            quizData = data.quiz;
+            startGame();
+          }
+          setServerStatus("Sincronizado", true);
+        } catch (e) {
+          setServerStatus("Erro de Conexão");
+        }
+      }, 3000);
+    }
+
+    function startGame() {
+      gameStartedLocal = true;
+      currentQ = 0;
+      timePenalty = 0;
+      startTime = Date.now();
+      showScreen('screen-quiz');
+      
+      timerInterval = setInterval(updateTimer, 100);
+      statusInterval = setInterval(sendLiveStatus, 5000);
+      
+      loadQuestion();
+    }
+
+    function updateTimer() {
+      const elapsed = (Date.now() - startTime) / 1000 + timePenalty;
+      document.getElementById('time-display').innerText = elapsed.toFixed(1) + 's';
+    }
+
+    async function sendLiveStatus() {
+      if (!gameStartedLocal) return;
+      const elapsed = (Date.now() - startTime) / 1000 + timePenalty;
+      try {
+        await fetch(GASURL, { 
+          method: 'POST', 
+          body: JSON.stringify({ 
+            action: 'update_status', 
+            nome: playerName, 
+            questao: (currentQ + 1), 
+            tempo: elapsed.toFixed(1) 
+          }) 
+        });
+      } catch(e) {}
+    }
+
+    function loadQuestion() {
+      if (currentQ >= quizData.length) return finishQuiz();
+      
+      const q = quizData[currentQ];
+      const container = document.getElementById('options-container');
+      const qText = document.getElementById('question-text');
+      
+      const progress = ((currentQ) / quizData.length) * 100;
+      document.getElementById('quiz-progress').style.width = progress + '%';
+      document.getElementById('q-counter').innerText = `Questão ${currentQ + 1} de ${quizData.length}`;
+      
+      qText.innerHTML = q.q;
+      renderMathSafe('question-text');
+      
+      container.innerHTML = '';
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.onclick = () => checkAnswer(idx);
+        
+        if (opt.type === 'image') {
+          btn.innerHTML = `<div class="option-image-wrap">${opt.content}</div><span>${opt.label}</span>`;
+        } else if (opt.type === 'latex') {
+          btn.innerHTML = `<span id="opt-math-${idx}">${opt.content}</span>`;
+          renderMathSafe(`opt-math-${idx}`);
+        } else {
+          btn.innerHTML = `<span>${opt.content}</span>`;
+        }
+        container.appendChild(btn);
+      });
+    }
+
+    async function checkAnswer(idx) {
+      const btns = document.querySelectorAll('.option-btn');
+      const correctIdx = quizData[currentQ].ans;
+      
+      if (idx === correctIdx) {
+        // Acertou: Desabilita tudo e avança
+        btns.forEach(b => b.disabled = true);
+        btns[idx].classList.add('correct');
+        setTimeout(() => {
+          currentQ++;
+          loadQuestion();
+        }, 600);
+      } else {
+        // Errou: Apenas penaliza e mostra erro, NÃO avança
+        btns[idx].disabled = true;
+        btns[idx].classList.add('wrong');
+        
+        timePenalty += 5;
+        document.getElementById('penalty-overlay').classList.add('active');
+        
+        setTimeout(() => {
+          document.getElementById('penalty-overlay').classList.remove('active');
+          // Permite tentar novamente as outras opções
+        }, 2000);
+      }
+    }
+
+    async function finishQuiz() {
+      gameStartedLocal = false;
+      clearInterval(timerInterval);
+      clearInterval(statusInterval);
+      
+      const finalTime = (Date.now() - startTime) / 1000 + timePenalty;
+      document.getElementById('final-time').innerText = finalTime.toFixed(1) + 's';
+      document.getElementById('quiz-progress').style.width = '100%';
+      
+      showScreen('screen-result');
+      
+      try {
+        await fetch(GASURL, { 
+          method: 'POST', 
+          body: JSON.stringify({ 
+            action: 'submit_time', 
+            nome: playerName, 
+            tempo_segundos: finalTime.toFixed(2) 
+          }) 
+        });
+      } catch(e) {}
+      
+      loadLeaderboard('student-leaderboard');
+      leaderboardInterval = setInterval(() => loadLeaderboard('student-leaderboard'), 5000);
+    }
+
+    async function loadLeaderboard(containerId) {
+      try {
+        const res = await fetch(GASURL, { method: 'POST', body: JSON.stringify({ action: 'get_leaderboard' }) });
+        const data = await res.json();
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        
+        data.ranking.forEach((r, i) => {
+          const div = document.createElement('div');
+          div.className = `rank-item ${i === 0 ? 'top-1' : ''}`;
+          div.innerHTML = `
+            <div class="rank-header">
+              <span>${i+1}º • ${r[0]}</span>
+              <span style="color: var(--primary)">${Number(r[1]).toFixed(1)}s</span>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      } catch(e) {}
+    }
+
+    // PROFESSOR
+    function enterTeacherMode() {
+      const pass = prompt("Senha de acesso:");
+      if (pass === "123") {
+        isTeacherMode = true;
+        showScreen('screen-teacher');
+        setServerStatus("Modo Gestor", true);
+        refreshTeacherPanels();
+        if (teacherStatusInterval) clearInterval(teacherStatusInterval);
+        teacherStatusInterval = setInterval(refreshTeacherPanels, 4000);
+      } else {
+        alert("Acesso negado.");
+      }
+    }
+
+    async function triggerStartGame() {
+      if (!confirm("Iniciar o desafio para todos os alunos conectados?")) return;
+      try {
+        await fetch(GASURL, { method: 'POST', body: JSON.stringify({ action: 'start_game' }) });
+        alert("Desafio iniciado!");
+      } catch(e) { alert("Erro ao iniciar."); }
+    }
+
+    async function triggerResetGame() {
+      if (!confirm("ATENÇÃO: Isso irá resetar todos os dados e parar o quiz atual. Continuar?")) return;
+      try {
+        await fetch(GASURL, { method: 'POST', body: JSON.stringify({ action: 'reset_game' }) });
+        // Em vez de recarregar a página inteira, apenas limpa os painéis locais e avisa
+        refreshTeacherPanels();
+        alert("Sessão resetada com sucesso. O painel foi atualizado.");
+      } catch(e) { alert("Erro ao resetar."); }
+    }
+
+    async function refreshTeacherPanels() {
+      if (!isTeacherMode) return;
+      try {
+        const res1 = await fetch(GASURL, { method: 'POST', body: JSON.stringify({ action: 'get_status_all' }) });
+        const data1 = await res1.json();
+        const liveContainer = document.getElementById('teacher-live-status');
+        if (liveContainer) {
+          liveContainer.innerHTML = '';
+          data1.students.forEach(s => {
+            const pct = (s.questao / 10) * 100;
+            const div = document.createElement('div');
+            div.className = 'rank-item';
+            div.innerHTML = `
+              <div class="rank-header">
+                <span>${s.nome}</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted)">Q${s.questao} • ${s.tempo}s</span>
+              </div>
+              <div class="rank-bar-bg"><div class="rank-bar-fill" style="width: ${pct}%"></div></div>
+            `;
+            liveContainer.appendChild(div);
+          });
+        }
+        loadLeaderboard('teacher-leaderboard');
+      } catch(e) {}
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderMathSafe('screen-login');
+    });
+
+  </script>
+</body>
+</html>
