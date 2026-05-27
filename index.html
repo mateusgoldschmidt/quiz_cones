@@ -553,5 +553,33 @@
     });
 
   </script>
+
+  <!-- Botão fixo: Voltar ao portal -->
+<style>
+  #btn-voltar {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 9999;
+    background: linear-gradient(135deg, #1a237e, #1565c0);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  #btn-voltar:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.45); }
+</style>
+<a id="btn-voltar" href="https://mateusgoldschmidt.github.io/cones-portal/">
+  &#8592; Menu principal
+</a>
 </body>
 </html>
